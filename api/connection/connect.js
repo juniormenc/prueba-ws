@@ -1,4 +1,4 @@
-/*
+
 var serverBD = {
     username: 'oikjetgenfdsgd',
     password: '1ec682bee8023abdb97f0181238f86f0380016eb5bd5c21912ae548a777a1616',
@@ -9,8 +9,8 @@ var serverBD = {
     max: 20,
     idleTimeoutMillis: 3000,
 }
-*/
 
+/*
 var serverBD = {
     username: 'postgres',
     password: 'postgres',
@@ -24,6 +24,6 @@ var serverBD = {
     //min: 4, // set min pool size to 4
     //connectionTimeoutMillis: 1000, // return an error after 1 second if connection could not be established
 }
-
+*/
 
 module.exports = serverBD;
