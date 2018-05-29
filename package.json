@@ -1,0 +1,29 @@
+{
+  "name": "ws",
+  "version": "1.0.0",
+  "description": "Web Services in node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "serve": "nodemon server.js"
+  },
+  "keywords": [
+    "web",
+    "services"
+  ],
+  "author": "Elmer Junior Mendoza Carlos",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "morgan": "^1.9.0",
+    "pg": "^7.0",
+    "cors": "2.8.4",
+    "nodemon": "^1.17.3"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": "9.9.0"
+  }
+}
