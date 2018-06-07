@@ -110,6 +110,37 @@ router.post('/reservar', (req, res, next) => {
 
 });
 
+//RUTA POST
+router.post('/reservar/sin_usuario', (req, res, next) => {
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select * from ins_reserva_sin_usuario('"+req.body.fecha+"', '"+req.body.horario+"', '"+req.body.tiempo+"', '"+req.body.costo+"', '"+req.body.paciente+"', '"+req.body.turno+"', '"+req.body.dni+"', '"+req.body.celular+"')")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results,
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+
+});
+
 //RUTA GET
 router.get('/reserva/paciente/:id', (req, res, next) => {
     const id = req.params.id;
