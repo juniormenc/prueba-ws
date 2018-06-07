@@ -170,4 +170,34 @@ router.put('/:id', (req, res, next) => {
     })
 });
 
+//RUTA POST CAMBIAR CLAVE
+router.post('/clave', (req, res, next) => {
+    
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+    
+    pool.connect()
+    .then(client => {
+        return client.query("select upd_clave_paciente('"+req.body.id+"','"+req.body.clantigua+"', '"+req.body.clnueva+"')")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results[0],
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+});
+
 module.exports = router;
