@@ -174,6 +174,102 @@ router.get('/reserva/paciente/:id', (req, res, next) => {
 });
 
 //RUTA GET
+router.get('/reserva/detalle/:id', (req, res, next) => {
+    const id = req.params.id;
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+    
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select * from sel_reserva_detalle('"+id+"') as (id int, fecha text, horario character varying(100), paciente text, medico text, consultorio character varying(100), especialidad character varying(100), tiempo_plazo int, costo numeric(10,2), estado boolean, paciente_id int, turno_id int, createdat text)")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results,
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+
+});
+
+//RUTA GET
+router.get('/reserva', (req, res, next) => {
+    const filtro = req.params.filtro;
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+    
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select * from sel_reserva('') as (id int, dni_re character(8), dni_pa character(8), paciente text, celular_re character varying, celular_pa character varying, medico text, fecha text, horario character varying, tiempo_plazo int, costo numeric(10,2), estado boolean, paciente_id int, turno_id int, enlazar boolean, reservar boolean, createdat text)")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results,
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+
+});
+
+//RUTA GET
+router.get('/reserva/:filtro', (req, res, next) => {
+    const filtro = req.params.filtro;
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+    
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select * from sel_reserva('"+filtro+"') as (id int, dni_re character(8), dni_pa character(8), paciente text, celular_re character varying, celular_pa character varying, medico text, fecha text, horario character varying, tiempo_plazo int, costo numeric(10,2), estado boolean, paciente_id int, turno_id int, enlazar boolean, reservar boolean, createdat text)")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results,
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+
+});
+
+//RUTA GET
 router.get('/hoy/:id', (req, res, next) => {
     const id = req.params.id;
     
@@ -282,6 +378,38 @@ router.put('/finalizar/:id', (req, res, next) => {
     pool.connect()
     .then(client => {
         return client.query("select * from upd_cita_finalizar('"+id+"', '"+req.body.hora_inicio+"', '"+req.body.hora_fin+"')")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results[0],
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+});
+
+//RUTA PUT ENLAZAR
+router.put('/enlazar/:id_re/:id_pac', (req, res, next) => {
+    const id_re = req.params.id_re;
+    const id_pac = req.params.id_pac;
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+    
+    pool.connect()
+    .then(client => {
+        return client.query("select upd_reserva_enlazar('"+id_re+"', '"+id_pac+"')")
         .then(result => {
             client.release()
             results = result.rows;
