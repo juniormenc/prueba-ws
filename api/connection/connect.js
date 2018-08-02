@@ -1,10 +1,10 @@
 
 var serverBD = {
-    username: 'oikjetgenfdsgd',
-    password: '1ec682bee8023abdb97f0181238f86f0380016eb5bd5c21912ae548a777a1616',
-    ip: 'ec2-54-235-193-34.compute-1.amazonaws.com',
+    username: 'oqgktyhhazfvrt',
+    password: '13ddae8daedfae7f22f270d22db2ff253f53e289a9cdd9ee61bc8af23f1a9d24',
+    ip: 'ec2-174-129-247-1.compute-1.amazonaws.com',
     port: '5432',
-    database: 'd1077v0gj89mb9',
+    database: 'da1oa4bj3eudi9',
     ssl: true,
     max: 20,
     idleTimeoutMillis: 3000,
