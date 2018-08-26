@@ -270,8 +270,9 @@ router.get('/reserva/:filtro', (req, res, next) => {
 });
 
 //RUTA GET
-router.get('/hoy/:id', (req, res, next) => {
+router.get('/hoy/:id/:fecha_hoy', (req, res, next) => {
     const id = req.params.id;
+    const fecha_hoy = req.params.fecha_hoy;
     
     //VARIABLES DE ALMACENAMIENTO
     var results = [];
@@ -283,7 +284,7 @@ router.get('/hoy/:id', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_citas_hoy_por_medico('"+id+"') as (id int, paciente_id int, dni character(8), paciente text, fecha_nacimiento text)")
+        return client.query("select * from sel_citas_hoy_por_medico('"+id+"', '"+fecha_hoy+"') as (id int, paciente_id int, dni character(8), paciente text, fecha_nacimiento text)")
         .then(result => {
             client.release()
             results = result.rows;
