@@ -17,8 +17,9 @@ const pool = new Pool({
 })
 
 //RUTA GET (LISTAR TODOS)
-router.get('/', (req, res, next) => {
-    
+router.get('/:fecha', (req, res, next) => {
+    const fecha = req.params.fecha;
+
     //VARIABLES DE ALMACENAMIENTO
     var results = [];
     
@@ -29,7 +30,40 @@ router.get('/', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_turno('') as (id int, fecha_turno text, total_citas int, usuario_id int, nombres character varying, apellido_paterno character varying, apellido_materno character varying, consultorio_id int, numero_consultorio character varying, horario_id int, hora_entrada time, hora_salida time, estado boolean, createdat text)")
+        return client.query("select * from sel_turno('', '"+fecha+"') as (id int, fecha_turno text, total_citas int, usuario_id int, nombres character varying, apellido_paterno character varying, apellido_materno character varying, consultorio_id int, numero_consultorio character varying, horario_id int, hora_entrada time, hora_salida time, estado boolean, createdat text)")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results,
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+
+});
+
+//RUTA GET (LISTAR TODOS)
+router.get('/:med_id/:fecha', (req, res, next) => {
+    const med_id = req.params.med_id;
+    const fecha = req.params.fecha;
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+    
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select * from sel_turno_segun_medico('', '"+med_id+"', '"+fecha+"') as (id int, fecha_turno text, total_citas int, usuario_id int, nombres character varying, apellido_paterno character varying, apellido_materno character varying, consultorio_id int, numero_consultorio character varying, horario_id int, hora_entrada time, hora_salida time, estado boolean, createdat text)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -48,8 +82,10 @@ router.get('/', (req, res, next) => {
 });
 
 //RUTA GET (LISTAR - FILTRO)
-router.get('/listar/:filtro', (req, res, next) => {
+router.get('/listar/:filtro/:fecha', (req, res, next) => {
     const filtro = req.params.filtro;
+    const fecha = req.params.fecha;
+
     //VARIABLES DE ALMACENAMIENTO
     var results = [];
     
@@ -60,7 +96,7 @@ router.get('/listar/:filtro', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_turno('"+filtro+"') as (id int, fecha_turno text, total_citas int, usuario_id int, nombres character varying, apellido_paterno character varying, apellido_materno character varying, consultorio_id int, numero_consultorio character varying, horario_id int, hora_entrada time, hora_salida time, estado boolean, createdat text)")
+        return client.query("select * from sel_turno('"+filtro+"', '"+fecha+"') as (id int, fecha_turno text, total_citas int, usuario_id int, nombres character varying, apellido_paterno character varying, apellido_materno character varying, consultorio_id int, numero_consultorio character varying, horario_id int, hora_entrada time, hora_salida time, estado boolean, createdat text)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -110,7 +146,7 @@ router.post('/', (req, res, next) => {
 });
 
 //RUTA GET (DETALLE)
-router.get('/:id', (req, res, next) => {
+router.get('/detalle/detalle/:id', (req, res, next) => {
     const id = req.params.id;
 
     //VARIABLES DE ALMACENAMIENTO
@@ -120,7 +156,7 @@ router.get('/:id', (req, res, next) => {
         console.error('Unexpected error on idle client', err)
         process.exit(-1)
     })
-
+    
     pool.connect()
     .then(client => {
         return client.query("select * from sel_turno_detalle('"+id+"') as (id int, fecha_turno text, total_citas int, usuario_id int, nombres character varying, apellido_paterno character varying, apellido_materno character varying, especialidad_id int, consultorio_id int, numero_consultorio character varying, horario_id int, hora_entrada time, hora_salida time, estado boolean, createdat text)")
@@ -203,6 +239,130 @@ router.put('/estado/:id', (req, res, next) => {
     })
 });
 
+//RUTA PUT (INHABILITAR)
+router.put('/inh/:id', (req, res, next) => {
+    const id = req.params.id;
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select upd_turno_inhabilitar('"+id+"')")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results[0],
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+});
+
+//RUTA PUT (INHABILITAR)
+router.put('/hab/:id', (req, res, next) => {
+    const id = req.params.id;
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select upd_turno_habilitar('"+id+"')")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results[0],
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+});
+
+//RUTA PUT (REDUCIR CITAS DISPONIBLES)
+router.put('/redct/:id', (req, res, next) => {
+    const id = req.params.id;
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select upd_turno_reducir_citas_disponibles('"+id+"')")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results[0],
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+});
+
+//RUTA PUT (AUMENTAR CITAS DISPONIBLES)
+router.put('/aumct/:id', (req, res, next) => {
+    const id = req.params.id;
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select upd_turno_aumentar_citas_disponibles('"+id+"')")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results[0],
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+});
+
 //RUTA GET (TURNO - MÉDICO - DISPONIBLE)
 router.get('/medico/:id/:fecha', (req, res, next) => {
     const id_es = req.params.id;
@@ -218,7 +378,7 @@ router.get('/medico/:id/:fecha', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_turno_medico_disponible('"+id_es+"', '"+fecha+"', '') as (id integer, nombre_medico text, consultorio character varying, horario text)")
+        return client.query("select * from sel_turno_medico_disponible('"+id_es+"', '"+fecha+"', '') as (id integer, total_citas integer, nombre_medico text, foto character varying, consultorio character varying, horario text)")
         .then(result => {
             client.release()
             results = result.rows;

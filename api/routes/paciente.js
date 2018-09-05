@@ -29,7 +29,7 @@ router.get('/', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_paciente('') as (id integer, dni character(8), nombres character varying, apellido_paterno character varying, apellido_materno character varying, fecha_nacimiento text, sexo character, domicilio character varying, estado_civil character, profesion character varying, tipo_sangre character, correo character varying, celular character varying, estado boolean, tipo_paciente_id integer, createdat text)")
+        return client.query("select * from sel_paciente('') as (id integer, tipo_doc_ide integer, doc_ide character varying(20), nacionalidad integer, nombres character varying, apellido_paterno character varying, apellido_materno character varying, fecha_nacimiento text, sexo character, departamento_dom character(2), provincia_dom character(2), distrito_dom character(2), domicilio character varying, estado_civil integer, profesion character varying, tipo_sangre integer, correo character varying, celular character varying, estado boolean, tipo_paciente_id integer, createdat text)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -59,7 +59,7 @@ router.get('/listar/:filtro', (req, res, next) => {
     
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_paciente('"+filtro+"') as (id integer, dni character(8), nombres character varying, apellido_paterno character varying, apellido_materno character varying, fecha_nacimiento text, sexo character, domicilio character varying, estado_civil character, profesion character varying, tipo_sangre character, correo character varying, celular character varying, estado boolean, tipo_paciente_id integer, createdat text)")
+        return client.query("select * from sel_paciente('"+filtro+"') as (id integer, tipo_doc_ide integer, doc_ide character varying(20), nacionalidad integer, nombres character varying, apellido_paterno character varying, apellido_materno character varying, fecha_nacimiento text, sexo character, departamento_dom character(2), provincia_dom character(2), distrito_dom character(2), domicilio character varying, estado_civil integer, profesion character varying, tipo_sangre integer, correo character varying, celular character varying, estado boolean, tipo_paciente_id integer, createdat text)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -90,7 +90,7 @@ router.post('/', (req, res, next) => {
     
     pool.connect()
     .then(client => {
-        return client.query("select * from ins_paciente('"+req.body.dni+"','"+req.body.nombres+"', '"+req.body.apellido_paterno+"', '"+req.body.apellido_materno+"', '"+req.body.fecha_nacimiento+"', '"+req.body.sexo+"', '"+req.body.domicilio+"', '"+req.body.estado_civil+"', '"+req.body.profesion+"', '"+req.body.tipo_sangre+"', '"+req.body.correo+"', '"+req.body.celular+"', 1)")
+        return client.query("select * from ins_paciente('"+req.body.tipo_doc_identidad+"','"+req.body.doc_identidad+"','"+req.body.nacionalidad+"','"+req.body.nombres+"', '"+req.body.apellido_paterno+"', '"+req.body.apellido_materno+"', '"+req.body.fecha_nacimiento+"', '"+req.body.sexo+"', '"+req.body.departamento+"', '"+req.body.provincia+"', '"+req.body.distrito+"', '"+req.body.domicilio+"', '"+req.body.estado_civil+"', '"+req.body.profesion+"', '"+req.body.tipo_sangre+"', '"+req.body.correo+"', '"+req.body.celular+"', 1)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -121,7 +121,7 @@ router.get('/:id', (req, res, next) => {
     
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_paciente_detalle('"+id+"') as (id integer, dni character(8), nombre character varying, apellido_paterno character varying, apellido_materno character varying, fecha_nacimiento text, edad text, sexo character, domicilio character varying, estado_civil character, profesion character varying, tipo_sangre character, correo character varying, celular character varying, estado boolean, tipo_paciente_id integer, createdat text)")
+        return client.query("select * from sel_paciente_detalle('"+id+"') as (id integer, tipo_doc_ide integer, doc_ide character varying(20), nacionalidad integer, nombre character varying, apellido_paterno character varying, apellido_materno character varying, fecha_nacimiento text, edad text, sexo character, departamento_dom character(2), provincia_dom character(2), distrito_dom character(2), domicilio character varying, estado_civil integer, profesion character varying, tipo_sangre integer, correo character varying, celular character varying, estado boolean, tipo_paciente_id integer, createdat text)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -140,8 +140,8 @@ router.get('/:id', (req, res, next) => {
 });
 
 //RUTA GET (DETALLE)
-router.get('/dni/:dni', (req, res, next) => {
-    const dni = req.params.dni;
+router.get('/doc_ide/:doc_ide', (req, res, next) => {
+    const doc_ide = req.params.doc_ide;
 
     //VARIABLES DE ALMACENAMIENTO
     var results = [];
@@ -153,7 +153,7 @@ router.get('/dni/:dni', (req, res, next) => {
     
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_paciente_dni('"+dni+"') as (id integer, dni character(8), nombre character varying, apellido_paterno character varying, apellido_materno character varying, fecha_nacimiento text, edad text, sexo character, domicilio character varying, estado_civil character, profesion character varying, tipo_sangre character, correo character varying, celular character varying, estado boolean, tipo_paciente_id integer, createdat text)")
+        return client.query("select * from sel_paciente_doc_ide('"+doc_ide+"') as (id integer, tipo_doc_identidad integer, doc_ide character varying(20), nacionalidad integer, nombre character varying, apellido_paterno character varying, apellido_materno character varying, fecha_nacimiento text, edad text, sexo character, departamento_dom character(2), provincia_dom character(2), distrito_dom character(2), domicilio character varying, estado_civil integer, profesion character varying, tipo_sangre integer, correo character varying, celular character varying, estado boolean, tipo_paciente_id integer, createdat text)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -185,7 +185,7 @@ router.put('/:id', (req, res, next) => {
     
     pool.connect()
     .then(client => {
-        return client.query("select * from upd_paciente('"+id+"', '"+req.body.dni+"', '"+req.body.nombres+"', '"+req.body.apellido_paterno+"', '"+req.body.apellido_materno+"', '"+req.body.fecha_nacimiento+"', '"+req.body.sexo+"', '"+req.body.domicilio+"', '"+req.body.estado_civil+"', '"+req.body.profesion+"', '"+req.body.tipo_sangre+"', '"+req.body.correo+"', '"+req.body.celular+"', true, 1)")
+        return client.query("select * from upd_paciente('"+id+"', '"+req.body.departamento+"', '"+req.body.provincia+"', '"+req.body.distrito+"', '"+req.body.domicilio+"', '"+req.body.estado_civil+"', '"+req.body.profesion+"', '"+req.body.tipo_sangre+"', '"+req.body.correo+"', '"+req.body.celular+"', true, 1)")
         .then(result => {
             client.release()
             results = result.rows;

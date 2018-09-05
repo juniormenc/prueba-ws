@@ -123,7 +123,7 @@ router.post('/reservar/sin_usuario', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from ins_reserva_sin_usuario('"+req.body.fecha+"', '"+req.body.horario+"', '"+req.body.tiempo+"', '"+req.body.costo+"', '"+req.body.paciente+"', '"+req.body.turno+"', '"+req.body.dni+"', '"+req.body.celular+"')")
+        return client.query("select * from ins_reserva_sin_usuario('"+req.body.fecha+"', '"+req.body.horario+"', '"+req.body.tiempo+"', '"+req.body.costo+"', '"+req.body.paciente+"', '"+req.body.turno+"', '"+req.body.doc_ide+"', '"+req.body.celular+"')")
         .then(result => {
             client.release()
             results = result.rows;
@@ -142,8 +142,9 @@ router.post('/reservar/sin_usuario', (req, res, next) => {
 });
 
 //RUTA GET
-router.get('/reserva/paciente/:id', (req, res, next) => {
+router.get('/reserva/paciente/:id/:fecha_hoy', (req, res, next) => {
     const id = req.params.id;
+    const fecha_hoy = req.params.fecha_hoy;
 
     //VARIABLES DE ALMACENAMIENTO
     var results = [];
@@ -155,7 +156,7 @@ router.get('/reserva/paciente/:id', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_reserva_por_paciente('"+id+"') as (reserva_id integer, paciente_id integer, turno_id integer, costo numeric(10,2), fecha text, paciente text, especialidad character varying, medico text, consultorio character varying, hora_cita time)")
+        return client.query("select * from sel_reserva_por_paciente('"+id+"', '"+fecha_hoy+"') as (reserva_id integer, paciente_id integer, turno_id integer, costo numeric(10,2), fecha text, paciente text, especialidad character varying, medico text, consultorio character varying, hora_cita time)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -219,7 +220,7 @@ router.get('/reserva', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_reserva('') as (id int, dni_re character(8), dni_pa character(8), paciente text, celular_re character varying, celular_pa character varying, medico text, fecha text, horario character varying, tiempo_plazo int, costo numeric(10,2), estado boolean, paciente_id int, turno_id int, enlazar boolean, reservar boolean, createdat text)")
+        return client.query("select * from sel_reserva('') as (id int, doc_ide_re varchar(20), doc_ide_pa varchar(20), paciente text, celular_re character varying, celular_pa character varying, medico text, fecha text, horario character varying, tiempo_plazo int, costo numeric(10,2), estado boolean, paciente_id int, turno_id int, enlazar boolean, reservar boolean, createdat text)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -251,7 +252,7 @@ router.get('/reserva/:filtro', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_reserva('"+filtro+"') as (id int, dni_re character(8), dni_pa character(8), paciente text, celular_re character varying, celular_pa character varying, medico text, fecha text, horario character varying, tiempo_plazo int, costo numeric(10,2), estado boolean, paciente_id int, turno_id int, enlazar boolean, reservar boolean, createdat text)")
+        return client.query("select * from sel_reserva('"+filtro+"') as (id int, doc_ide_re varchar(20), doc_ide_pa varchar(20), paciente text, celular_re character varying, celular_pa character varying, medico text, fecha text, horario character varying, tiempo_plazo int, costo numeric(10,2), estado boolean, paciente_id int, turno_id int, enlazar boolean, reservar boolean, createdat text)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -270,8 +271,9 @@ router.get('/reserva/:filtro', (req, res, next) => {
 });
 
 //RUTA GET
-router.get('/hoy/:id/:fecha_hoy', (req, res, next) => {
+router.get('/hoy/:id/:turno_id/:fecha_hoy', (req, res, next) => {
     const id = req.params.id;
+    const turno_id = req.params.turno_id;
     const fecha_hoy = req.params.fecha_hoy;
     
     //VARIABLES DE ALMACENAMIENTO
@@ -284,7 +286,7 @@ router.get('/hoy/:id/:fecha_hoy', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_citas_hoy_por_medico('"+id+"', '"+fecha_hoy+"') as (id int, paciente_id int, dni character(8), paciente text, fecha_nacimiento text)")
+        return client.query("select * from sel_citas_hoy_por_medico('"+id+"', '"+turno_id+"', '"+fecha_hoy+"') as (id int, paciente_id int, doc_identidad varchar(20), paciente text, fecha_nacimiento text)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -316,7 +318,7 @@ router.get('/historial/paciente/:id', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_historial_citas_por_paciente('"+id+"') as (fecha text, paciente text, especialidad character varying, medico text, consultorio character varying, hora_cita time, signos character varying, sintomas character varying, diagnostico_medico character varying, receta_tratamiento_medico character varying)")
+        return client.query("select * from sel_historial_citas_por_paciente('"+id+"') as (cita_id integer, fecha text, paciente text, especialidad character varying, medico text, consultorio character varying, hora_cita time)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -427,8 +429,9 @@ router.put('/enlazar/:id_re/:id_pac', (req, res, next) => {
     })
 });
 
-//RUTA POST
-router.post('/evaluacion', (req, res, next) => {
+//RUTA PUT
+router.put('/evaluacion/:id', (req, res, next) => {
+    const id = req.params.id;
 
     //VARIABLES DE ALMACENAMIENTO
     var results = [];
@@ -440,7 +443,39 @@ router.post('/evaluacion', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from ins_evaluacion_cita('"+req.body.talla+"', '"+req.body.peso+"', '"+req.body.presion+"', '"+req.body.examenes_realizados+"', '"+req.body.signos+"', '"+req.body.sintomas+"', '"+req.body.examenes_por_realizarse+"', '"+req.body.diagnostico_medico+"', '"+req.body.receta_tratamiento_medico+"', '"+req.body.cita_id+"')")
+        return client.query("select * from upd_evaluacion_cita('"+req.body.p_ruc+"', '"+req.body.p_empresa +"', '"+req.body.p_fecha+"', '"+req.body.p_t_doc_emitido+"', '"+req.body.p_nro_doc_emitido+"', '"+req.body.sv_fc+"', '"+req.body.sv_fr+"', '"+req.body.sv_pa+"', '"+req.body.sv_tem+"', '"+req.body.sv_pe+"', '"+req.body.sv_tal+"', '"+req.body.sv_imc+"', '"+req.body.sv_dmo+"', '"+req.body.h_p_a+"', '"+req.body.in_d+"', '"+req.body.act_fis+"', '"+req.body.d_desc+"', '"+req.body.m1+"', '"+req.body.m1_det+"', '"+req.body.m2+"', '"+req.body.m2_det+"', '"+req.body.m3+"', '"+req.body.m3_det+"', '"+req.body.m4+"', '"+req.body.m4_det+"', '"+req.body.m5+"', '"+req.body.m5_det+"', '"+req.body.m_rec_fis+"', '"+req.body.m_rec_fis_tipo+"', '"+req.body.m_rec_fis_otr+"', '"+req.body.m_fis_rehab+"', '"+req.body.m_alt_fitot+"', '"+req.body.m_alt_fotohem+"', '"+req.body.m_alt_prp+"', '"+req.body.m_alt_cel_m+"', '"+req.body.m_alt_infilt+"', '"+req.body.m_alt_baro_cam+"', '"+req.body.m_alt_ozono+"', '"+req.body.e_v+"', '"+req.body.e_v_otr +"', '"+req.body.inter1+"', '"+req.body.inter1_det+"', '"+req.body.inter2+"', '"+req.body.inter2_det+"', '"+req.body.inter3+"', '"+req.body.inter3_det+"', '"+req.body.so_es_hemogr+"', '"+req.body.so_es_hemogl+"', '"+req.body.so_es_gluc+"', '"+req.body.so_es_ure+"', '"+req.body.so_es_creatin+"', '"+req.body.so_es_ex_c_ori+"', '"+req.body.so_es_hormon+"', '"+req.body.so_es_cultiv+"', '"+req.body.so_es_ecogra+"', '"+req.body.so_es_rx+"', '"+req.body.so_es_tomogr+"', '"+req.body.so_es_resomag+"', '"+req.body.so_es_otr+"', '"+req.body.recom+"', '"+req.body.remun+"', '"+id+"')")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results,
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+
+});
+
+//RUTA PUT
+router.put('/evaluacion_ant/:id', (req, res, next) => {
+    const id = req.params.id;
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select * from upd_evaluacion_cita_ant('"+req.body.ant_tra+"', '"+req.body.ant_lug_tra+"', '"+req.body.ant_tie_ult_tra+"', '"+req.body.ant_instru+"', '"+req.body.ant_enf_card+"', '"+req.body.ant_enf_card_det+"', '"+req.body.ant_enf_pulm+"', '"+req.body.ant_enf_pulm_det+"', '"+req.body.ant_diab+"', '"+req.body.ant_diab_det+"', '"+req.body.ant_ale_alim+"', '"+req.body.ant_ale_alim_det+"', '"+req.body.ant_ale_medic+"', '"+req.body.ant_ale_medic_det+"', '"+req.body.ant_coles+"', '"+req.body.ant_coles_det+"', '"+req.body.ant_ts+"', '"+req.body.ant_ts_det+"', '"+req.body.ant_quir+"', '"+req.body.ant_quir_det+"', '"+req.body.ant_otr+"', '"+req.body.ex_piel+"', '"+req.body.ex_cabeza+"', '"+req.body.ex_ojo+"', '"+req.body.ex_torax+"', '"+req.body.ex_ap_resp+"', '"+req.body.ex_ap_card+"', '"+req.body.ex_ap_gastr+"', '"+req.body.ex_ap_genito+"', '"+req.body.ex_ap_musc+"', '"+req.body.ex_neuro+"', '"+req.body.ana_lab+"', '"+req.body.ana_lab_det+"', '"+req.body.im_rx+"', '"+req.body.im_tomo+"', '"+req.body.im_reso+"', '"+req.body.im_gamm+"', '"+req.body.ima_det+"', '"+req.body.dia_det+"', '"+req.body.prono+"', '"+id+"')")
         .then(result => {
             client.release()
             results = result.rows;
@@ -690,5 +725,37 @@ router.get('/reporte/ingresos_citas/:id_me/:fecha_desde/:fecha_hasta', (req, res
     })
     
 });
+
+//RUTA GET SIN PA
+router.get('/hc/cita/:id', (req, res, next) => {
+    const id = req.params.id;
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+    
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select * from cita where id = '"+id+"'")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results[0],
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+});
+
 
 module.exports = router;

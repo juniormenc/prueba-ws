@@ -1,16 +1,16 @@
-/*
+
 var serverBD = {
-    username: 'oqgktyhhazfvrt',
-    password: '13ddae8daedfae7f22f270d22db2ff253f53e289a9cdd9ee61bc8af23f1a9d24',
-    ip: 'ec2-174-129-247-1.compute-1.amazonaws.com',
+    username: 'vsbslzptigyrws',
+    password: '00df1cfd93b2a81a91f46aceb49e239153bcef9dfb6b60a6ed65a504381203ad',
+    ip: 'ec2-107-21-233-72.compute-1.amazonaws.com',
     port: '5432',
-    database: 'da1oa4bj3eudi9',
+    database: 'd36fstib41g5v9',
     ssl: true,
     max: 20,
     idleTimeoutMillis: 3000,
 }
-*/
 
+/*
 var serverBD = {
     username: 'postgres',
     password: 'postgres',
@@ -24,6 +24,6 @@ var serverBD = {
     //min: 4, // set min pool size to 4
     //connectionTimeoutMillis: 1000, // return an error after 1 second if connection could not be established
 }
-
+*/
 
 module.exports = serverBD;

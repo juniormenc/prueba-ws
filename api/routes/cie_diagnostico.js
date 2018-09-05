@@ -16,12 +16,12 @@ const pool = new Pool({
     idleTimeoutMillis: serverBD.idleTimeoutMillis,
 })
 
-//RUTA GET (LISTAR DEPARTAMENTO)
-router.get('/departamento', (req, res, next) => {
+//RUTA POST
+router.post('/', (req, res, next) => {
     
     //VARIABLES DE ALMACENAMIENTO
     var results = [];
-
+    
     pool.on('error', (err, client) => {
         console.error('Unexpected error on idle client', err)
         process.exit(-1)
@@ -29,7 +29,7 @@ router.get('/departamento', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_departamento() as (id char(2), departamento character varying)")
+        return client.query("select ins_cita_diagnostico('"+req.body.cita_id+"', '"+req.body.code+"', '"+req.body.enfermedad+"')")
         .then(result => {
             client.release()
             results = result.rows;
@@ -47,45 +47,13 @@ router.get('/departamento', (req, res, next) => {
 
 });
 
-//RUTA GET (LISTAR PROVINCIA - ID)
-router.get('/provincia/:id', (req, res, next) => {
-    const id = req.params.id;    
-    //VARIABLES DE ALMACENAMIENTO
-    var results = [];
-
-    pool.on('error', (err, client) => {
-        console.error('Unexpected error on idle client', err)
-        process.exit(-1)
-    })
-
-    pool.connect()
-    .then(client => {
-        return client.query("select * from sel_provincia('"+id+"') as (id char(2), provincia character varying)")
-        .then(result => {
-            client.release()
-            results = result.rows;
-            return res.status(201).json({
-                recordSet: {
-                    element: results,
-                },
-            });
-        })
-        .catch(e => {
-            client.release()
-            console.log(err.stack)
-        })
-    })
-
-});
-
-//RUTA GET (LISTAR DISTRITO - ID)
-router.get('/distrito/:id_pro/:id_dep', (req, res, next) => {
-    const id_pro = req.params.id_pro;
-    const id_dep = req.params.id_dep;
+//RUTA GET
+router.get('/diagnosticos/:id', (req, res, next) => {
+    const id = req.params.id;
 
     //VARIABLES DE ALMACENAMIENTO
     var results = [];
-
+    
     pool.on('error', (err, client) => {
         console.error('Unexpected error on idle client', err)
         process.exit(-1)
@@ -93,7 +61,7 @@ router.get('/distrito/:id_pro/:id_dep', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_distrito('"+id_pro+"','"+id_dep+"') as (id char(2), distrito character varying)")
+        return client.query("select * from sel_cita_diagnosticos('"+id+"') as (cita_id integer, code character varying, enfermedad character varying)")
         .then(result => {
             client.release()
             results = result.rows;
@@ -108,7 +76,8 @@ router.get('/distrito/:id_pro/:id_dep', (req, res, next) => {
             console.log(err.stack)
         })
     })
-
 });
+
+
 
 module.exports = router;
