@@ -239,6 +239,39 @@ router.get('/reserva', (req, res, next) => {
 });
 
 //RUTA GET
+router.get('/reserva/med_fe/:id_m/:fecha', (req, res, next) => {
+    const id_m = req.params.id_m;
+    const fecha = req.params.fecha;
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+    
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select * from sel_reserva_medico_fecha('"+id_m+"', '"+fecha+"') as (id int, doc_ide_re varchar(20), doc_ide_pa varchar(20), paciente text, celular_re character varying, celular_pa character varying, medico text, fecha text, horario character varying, tiempo_plazo int, costo numeric(10,2), estado boolean, paciente_id int, turno_id int, enlazar boolean, reservar boolean, createdat text)")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results,
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+
+});
+
+//RUTA GET
 router.get('/reserva/:filtro', (req, res, next) => {
     const filtro = req.params.filtro;
 
