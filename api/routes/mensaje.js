@@ -78,4 +78,37 @@ router.get('/', (req, res, next) => {
 
 });
 
+//RUTA PUT
+router.put('/:id', (req, res, next) => {
+    const id = req.params.id;
+    
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+    
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select * from upd_mensaje_inhabilitar('"+id+"')")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results,
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+
+});
+
+
 module.exports = router;
