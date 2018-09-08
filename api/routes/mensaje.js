@@ -47,4 +47,35 @@ router.post('/', (req, res, next) => {
 
 });
 
+//RUTA GET
+router.get('/', (req, res, next) => {
+
+    //VARIABLES DE ALMACENAMIENTO
+    var results = [];
+    
+    pool.on('error', (err, client) => {
+        console.error('Unexpected error on idle client', err)
+        process.exit(-1)
+    })
+
+    pool.connect()
+    .then(client => {
+        return client.query("select * from sel_mensaje() as (id integer, doc_identidad character varying, nombre character varying, celular character varying, correo character varying, diagnostico character varying, medicamento character varying, fecha text, medico_id integer, medico text, estado boolean)")
+        .then(result => {
+            client.release()
+            results = result.rows;
+            return res.status(201).json({
+                recordSet: {
+                    element: results,
+                },
+            });
+        })
+        .catch(e => {
+            client.release()
+            console.log(err.stack)
+        })
+    })
+
+});
+
 module.exports = router;
