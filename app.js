@@ -7,6 +7,7 @@ const cors = require('cors')
 //RUTAS
 const usuarioRoutes = require('./api/routes/usuario');
 
+const mensajeRoutes = require('./api/routes/mensaje');
 const cieRoutes = require('./api/routes/cie');
 const cieDiagnosticoRoutes = require('./api/routes/cie_diagnostico');
 const citaRoutes = require('./api/routes/cita');
@@ -27,6 +28,7 @@ app.use(cors());
 
 app.use('/usuario', usuarioRoutes);
 
+app.use('/mensaje', mensajeRoutes);
 app.use('/cie', cieRoutes);
 app.use('/cie_diagnostico', cieDiagnosticoRoutes);
 app.use('/cita', citaRoutes);
