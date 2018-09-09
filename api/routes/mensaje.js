@@ -29,7 +29,7 @@ router.post('/', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select ins_mensaje('"+req.body.doc_ide+"', '"+req.body.nom+"', '"+req.body.cel+"', '"+req.body.cor+"', '"+req.body.diag+"', '"+req.body.med+"', '"+req.body.fech+"', '"+req.body.med_id+"')")
+        return client.query("select ins_mensaje('"+req.body.doc_ide+"', '"+req.body.nom+"', '"+req.body.cel+"', '"+req.body.cor+"', '"+req.body.diag+"', '"+req.body.med+"', '"+req.body.ana+"', '"+req.body.fech+"', '"+req.body.med_id+"')")
         .then(result => {
             client.release()
             results = result.rows;
@@ -60,7 +60,7 @@ router.get('/', (req, res, next) => {
 
     pool.connect()
     .then(client => {
-        return client.query("select * from sel_mensaje() as (id integer, doc_identidad character varying, nombre character varying, celular character varying, correo character varying, diagnostico character varying, medicamento character varying, fecha text, medico_id integer, medico text, estado boolean)")
+        return client.query("select * from sel_mensaje() as (id integer, doc_identidad character varying, nombre character varying, celular character varying, correo character varying, diagnostico character varying, medicamento character varying, analisis character varying, fecha text, medico_id integer, medico text, estado boolean)")
         .then(result => {
             client.release()
             results = result.rows;
